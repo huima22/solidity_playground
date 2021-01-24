@@ -59,8 +59,12 @@ contract Coin {
         _;//stacked modifier
     }
     
-     modifier checkCoinsInCirculation () {
-        require(numberOfCoinMinted >= 8888, "Insufficient coins minted before anyone can quit."); 
+    modifier checkCoinsInCirculation {
+        uint count;
+        for (uint i = 0; i < userAddresses.length; i++) {
+            count = users[userAddresses[i]].balance + count;
+        }
+        require(count>=8888, "Total number of coins in circulation is not yet 8888.");
         _;
     }
      
