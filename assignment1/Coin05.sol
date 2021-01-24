@@ -5,30 +5,33 @@ contract Coin {
   address public minter; 
   uint constant public max_amount = 88;
   uint public numberOfCoinMinted;
-  mapping (address => Player) public players; 
-  address [] public playerAddress;
-  struct Player{
+  mapping (address => User) public users; 
+  address [] public userAddresses;
+  
+  struct User{
       uint balance;
       string name;
-      string phoneNumber;
+      uint phoneNumber;
   }
   
   constructor( ) public { 
     minter = msg.sender; 
   }
-   function addPlayer(address playAddress,string memory name, string memory phoneNumber) public{
-      playerAddress.push(playAddress);
-      players[playAddress] = Player(0,name,phoneNumber);
-  }
   
-  function removePlayer(address playAddress) public {
-      removeByValue(playAddress);
-      delete players[playAddress];
+  function addUser(address userAddress, string memory name, uint phoneNumber) public {
+    require(phoneNumber > 9999999 && phoneNumber < 100000000, "Please enter a valid Singapore number without country code.");
+    userAddresses.push(userAddress);
+    users[userAddress] = User(0, name, phoneNumber);
+   }
+
+  function removeUser(address userAddress) public {
+      removeByValue(userAddress);
+      delete users[userAddress];
   }
   
   function find(address value) internal view returns(uint){
         uint i = 0;
-        while (playerAddress[i] != value) {
+        while (userAddresses[i] != value) {
             i++;
         }
         return i;
@@ -40,68 +43,57 @@ contract Coin {
     }
 
     function removeByIndex(uint i) public {
-        while (i<playerAddress.length-1) {
-            playerAddress[i] = playerAddress[i+1];
+        while (i<userAddresses.length-1) {
+            userAddresses[i] = userAddresses[i+1];
             i++;
         }
-         playerAddress.pop();
+         userAddresses.pop();
     }
   
-  
-    
-   function getNumberOfCoinMinted() public view returns(uint)  {
-        return numberOfCoinMinted;
-    } 
-    
+     
+     function mint(address receiver, uint amount) public onlyMinter checkIfUserExist(receiver) checkBeforeMint(amount) {
+        numberOfCoinMinted = numberOfCoinMinted + amount;
+        users[receiver].balance += amount;
+    }
+     
+    modifier checkBeforeMint(uint amount) {
+        require(numberOfCoinMinted + amount < max_amount, "Max number of 88 coins reached");
+        _;
+    }
 
+    modifier onlyMinter() {
+        require(msg.sender == minter, "Only minter can mint coin.");
+        _;//stacked modifiers, this will now contain the next modifier - checkBeforeMint
+    }
     
-     function setNumberOfCoinMinted(uint  _numberOfCoinMinted) public {
-        numberOfCoinMinted = _numberOfCoinMinted;
-    } 
-     
-  
-     function mint(address receiver, uint amount) public checkBeforeMint { 
-       numberOfCoinMinted = numberOfCoinMinted + amount;
-       players[receiver].balance += amount; 
-     } 
-     
-     modifier checkBeforeMint() {
-         require(msg.sender == minter, "Only minter can mint coin." ); 
-         require(numberOfCoinMinted < max_amount, "Max number of coins reached" ); 
-         _;
-     } 
-   
-    
-     function send(address receiver, uint amount) public checkIfBalanceSufficient(amount) checkIfBalanceTwiceSufficient(amount) { 
-       players[msg.sender].balance -= amount; 
-       players[receiver].balance += amount; 
+     function send(address receiver, uint amount) public checkIfBalanceSufficient(amount){ 
+       users[msg.sender].balance -= amount; 
+       users[receiver].balance += amount; 
      } 
      
      modifier checkIfBalanceSufficient(uint amount) {
-          require(amount <= players[msg.sender].balance, "Insufficient balance."); 
+          require(amount * 2 <= users[msg.sender].balance, "Insufficient balance."); 
           _;
      }
      
-      modifier checkIfBalanceTwiceSufficient(uint amount) {
-         require(amount * 2 <= players[msg.sender].balance, "Insufficient balance."); 
-          _;
-     }
+    modifier checkIfUserExist(address receiver) {
+        require(users[receiver].phoneNumber != 0, "User not yet added to");//phoneNumber default to 0 but not possible during creation
+        _;//stacked modifier
+    }
      
-     
-        function distributeRemainingAndRemove() public {
-            uint inheritance = 0;
-            uint totalAmountToDistribute = players[msg.sender].balance ;
-            removePlayer(msg.sender);
-            if(playerAddress.length > 0){
-                 inheritance = totalAmountToDistribute / (playerAddress.length);
-            } else {
-                inheritance = 0;
-            }
+    function distributeRemainingAndRemove() public {
+        uint inheritance = 0;
+        uint totalAmountToDistribute = users[msg.sender].balance ;
+        removeUser(msg.sender);
+        if(userAddresses.length > 0){
+            inheritance = totalAmountToDistribute / (userAddresses.length);
+        } else {
+            inheritance = 0;
+        }
         
-          for (uint i = 0; i < playerAddress.length; i++) {
-            players[playerAddress[i]].balance = players[playerAddress[i]].balance  + inheritance;
-          }
-         
+        for (uint i = 0; i < userAddresses.length; i++) {
+            users[userAddresses[i]].balance = users[userAddresses[i]].balance  + inheritance;
+        }
     }    
 
      

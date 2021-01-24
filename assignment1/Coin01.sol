@@ -25,7 +25,7 @@ contract Coin {
   } 
   
   modifier checkIfBalanceSufficient(uint amount) {
-       require(amount <= balances[msg.sender], "Insufficient balance."); 
-       _;
+    require(amount <= balances[msg.sender], "Insufficient balance."); 
+    _;
   }
 }
