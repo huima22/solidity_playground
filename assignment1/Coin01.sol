@@ -15,8 +15,8 @@ contract Coin {
   } 
   
   modifier onlyMinter() {
-      require(msg.sender == minter, "Only minter can mint coin." ); 
-      _;
+    require(msg.sender == minter, "Only minter can mint coin." ); 
+    _;
   }
  
   function send(address receiver, uint amount) public checkIfBalanceSufficient(amount) { 
