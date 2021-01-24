@@ -58,8 +58,14 @@ contract Coin {
         require(users[receiver].phoneNumber != 0, "User not yet added to");//phoneNumber default to 0 but not possible during creation
         _;//stacked modifier
     }
+    
+     modifier checkCoinsInCirculation () {
+        require(numberOfCoinMinted >= 8888, "Insufficient coins minted before anyone can quit."); 
+        _;
+    }
      
-    function distributeRemainingAndRemove() public {
+     
+    function distributeRemainingAndRemove() public checkCoinsInCirculation{
         uint inheritance = 0;
         uint totalAmountToDistribute = users[msg.sender].balance ;
         removeUser(msg.sender);
@@ -73,8 +79,8 @@ contract Coin {
                     newsize++;
                     users[userAddresses[i]].balance = users[userAddresses[i]].balance  + inheritance;
                 } 
-                userAddresses = temporaryUserAddress;
             }
+            userAddresses = temporaryUserAddress;
             
         } else if (userAddresses.length == 1) {
             users[userAddresses[0]].balance = users[userAddresses[0]].balance  + totalAmountToDistribute;

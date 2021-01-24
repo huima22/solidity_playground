@@ -9,30 +9,29 @@ contract Coin {
   address [] public userAddresses;
   
   struct User{
-      uint balance;
-      string name;
-      uint phoneNumber;
+       uint balance;
+       string name;
+       uint phoneNumber;
   }
   
   constructor( ) public { 
-    minter = msg.sender; 
+        minter = msg.sender; 
   }
   
   function addUser(address userAddress, string memory name, uint phoneNumber) public {
-    require(phoneNumber > 9999999 && phoneNumber < 100000000, "Please enter a valid Singapore number without country code.");
-    userAddresses.push(userAddress);
-    users[userAddress] = User(0, name, phoneNumber);
+		userAddresses.push(userAddress);
+		users[userAddress] = User(0, name, phoneNumber);
    }
 
   function removeUser(address userAddress) public {
-      removeByValue(userAddress);
-      delete users[userAddress];
+		removeByValue(userAddress);
+		delete users[userAddress];
   }
   
   function find(address value) internal view returns(uint){
         uint i = 0;
         while (userAddresses[i] != value) {
-            i++;
+           i++;
         }
         return i;
     }
@@ -80,8 +79,13 @@ contract Coin {
         require(users[receiver].phoneNumber != 0, "User not yet added to");//phoneNumber default to 0 but not possible during creation
         _;//stacked modifier
     }
+    
+    modifier checkCoinsInCirculation {
+        require(numberOfCoinMinted >= 8888, "Insufficient coins minted before anyone can quit."); 
+         _;
+    }
      
-    function distributeRemainingAndRemove() public {
+    function distributeRemainingAndRemove() public checkCoinsInCirculation{
         uint inheritance = 0;
         uint totalAmountToDistribute = users[msg.sender].balance ;
         removeUser(msg.sender);
