@@ -16,6 +16,7 @@ contract Coin {
 
     constructor() public {
         minter = msg.sender;
+		users[msg.sender] = User(0, "minter", 99999999); //initialise the contract creator
     }
 
     function addUser(address userAddress, string memory name, uint phoneNumber) public {
