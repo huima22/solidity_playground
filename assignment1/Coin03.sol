@@ -1,11 +1,12 @@
+  
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.7.0;
 
 contract Coin {
     address public minter;
     uint constant maxAmount = 88;
-    uint public numberOfCoinMinted = 0;
-    mapping(address => User) public user;
+    uint public numberOfCoinMintedForMinter = 0;
+    mapping(address => User) public users;
     address [] userAddresses;
 
     struct User {
@@ -23,18 +24,17 @@ contract Coin {
     function addUser(address userAddress, string memory name, uint phoneNumber) public {
         require(phoneNumber > 9999999 && phoneNumber < 100000000, "Please enter a valid Singapore number without country code.");
         userAddresses.push(userAddress);
-        user[userAddress] = User(0, name, phoneNumber);
+        users[userAddress] = User(0, name, phoneNumber);
     }
     
-    function mint(address receiver, uint amount) public onlyMinter checkIfUserExist(receiver) checkBeforeMint(amount) {
-        numberOfCoinMinted = numberOfCoinMinted + amount;
-        user[receiver].balance += amount;
+    function mint(address receiver, uint amount) public onlyMinter checkIfUserExist(receiver) {
+        if (receiver == minter) {
+            require(numberOfCoinMintedForMinter + amount <= maxAmount, "Max number of 88 coins for minter reached");
+            numberOfCoinMintedForMinter = numberOfCoinMintedForMinter + amount;
+        } 
+        users[receiver].balance += amount;
     }
 
-    modifier checkBeforeMint(uint amount) {
-        require(numberOfCoinMinted + amount < maxAmount, "Max number of 88 coins reached");
-        _;
-    }
 
     modifier onlyMinter() {
         require(msg.sender == minter, "Only minter can mint coin.");
@@ -42,17 +42,17 @@ contract Coin {
     }
 
     function send(address receiver, uint amount) public checkIfUserExist(receiver) checkIfBalanceSufficient(amount) {
-        user[msg.sender].balance -= amount;
-        user[receiver].balance += amount;
+        users[msg.sender].balance -= amount;
+        users[receiver].balance += amount;
     }
 
     modifier checkIfBalanceSufficient(uint amount) {
-        require(amount <= user[msg.sender].balance, "Insufficient balance.");
+        require(amount <= users[msg.sender].balance, "Insufficient balance.");
         _;
     }
 
     modifier checkIfUserExist(address receiver) {
-        require(user[receiver].phoneNumber != 0, "User not yet added to");//phoneNumber default to 0 but not possible during creation
+        require(users[receiver].phoneNumber != 0, "User not yet added to");//phoneNumber default to 0 but not possible during creation
         _;//stacked modifier
     }
 }
