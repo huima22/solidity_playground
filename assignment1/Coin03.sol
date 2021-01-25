@@ -52,7 +52,7 @@ contract Coin {
     }
 
     modifier checkIfUserExist(address receiver) {
-        require(users[receiver].phoneNumber != 0, "User not yet added to");//phoneNumber default to 0 but not possible during creation
+        require(users[receiver].phoneNumber != 0, "User not yet added to user list.");//phoneNumber default to 0 but not possible during creation
         _;//stacked modifier
     }
 }
