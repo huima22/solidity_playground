@@ -4,7 +4,7 @@ pragma solidity >=0.5.0 <0.7.0;
 contract Coin { 
     address public minter; 
     uint constant public maxAmount = 88;
-    uint public numberOfCoinMinted;
+    uint public numberOfCoinMintedForMinter = 0;
     mapping (address => User) public users; 
     address [] public userAddresses;
       
@@ -31,15 +31,14 @@ contract Coin {
   
     
     function mint(address receiver, uint amount) public onlyMinter { //removed checkBeforeMint modifier else coins will not go above 88
-        numberOfCoinMinted = numberOfCoinMinted + amount;
+        if (receiver == minter) {
+            require(numberOfCoinMintedForMinter + amount <= maxAmount, "Max number of 88 coins for minter reached");
+            numberOfCoinMintedForMinter = numberOfCoinMintedForMinter + amount;
+        } 
         users[receiver].balance += amount;
     }
      
-    modifier checkBeforeMint(uint amount) {
-        require(numberOfCoinMinted + amount < maxAmount, "Max number of 88 coins reached");
-        _;
-    }
-
+     
     modifier onlyMinter() {
         require(msg.sender == minter, "Only minter can mint coin.");
         _;//stacked modifiers, this will now contain the next modifier - checkBeforeMint
