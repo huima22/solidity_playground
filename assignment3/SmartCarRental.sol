@@ -63,7 +63,7 @@ contract SmartCarRental {
           inventoryList[contractManagementList[msg.sender].carIndex].currentCarState = CarState.IS_BROKEN;
       }
       
-        function fixMyRentedCar() isCustomer public payable returns (bool) {
+      function fixMyRentedCar() isCustomer public payable returns (bool) {
           if(msg.value >=  inventoryList[contractManagementList[msg.sender].carIndex].fixCost) {
               shopOwner.transfer(msg.value);
               inventoryList[contractManagementList[msg.sender].carIndex].currentCarState = CarState.IN_USE;
@@ -79,7 +79,7 @@ contract SmartCarRental {
          _;
      }  
      
-      function returnCar() preReturnCheck public returns(bool){
+      function returnCar() isCustomer preReturnCheck public returns(bool){
             contractManagementList[msg.sender].currentContractState = ContractState.COMPLETED;
             inventoryList[contractManagementList[msg.sender].carIndex].currentCarState = CarState.AVAILABLE_FOR_RENT;
       }
